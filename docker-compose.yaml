@@ -1,0 +1,53 @@
+version: "3"
+services: 
+  pgloader-mysql:
+    image: dimitri/pgloader
+    command: pgloader mysql://root:dalongrong@mysql/gogs postgresql://postgres:dalong@postgres:5432/appdemo
+  gogs:
+    image: gogs/gogs
+    ports:
+      - "10022:22"
+      - "3001:3000"
+    volumes:
+      - ./data/gogs:/data
+  mysqlexporter:
+    image: prom/mysqld-exporter
+    ports: 
+    - "9104:9104"
+    environment: 
+    - "DATA_SOURCE_NAME=root:dalongrong@(mysql:3306)/"
+  grafana:
+    image: grafana/grafana
+    ports:
+    - "3000:3000"
+  prometheus:
+    image: prom/prometheus
+    volumes:
+    - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+    ports:
+    - "9090:9090" 
+  mysql:
+    image: mysql:5.7.16
+    ports:
+      - 3306:3306
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: dalongrong
+      MYSQL_DATABASE: gogs
+      MYSQL_USER: gogs
+      MYSQL_PASSWORD: dalongrong
+      TZ: Asia/Shanghai
+  postgres:
+    build: 
+     context: ./pg
+     dockerfile: Dockerfile
+    ports:
+    - "5432:5432"
+    environment:
+    - "POSTGRES_PASSWORD:dalong"
+  pgexporter:
+    image: wrouesnel/postgres_exporter:latest
+    ports:
+    - 9187:9187
+    environment:
+    - DATA_SOURCE_NAME=postgresql://postgres:dalong@postgres:5432/postgres_exporter?sslmode=disable
