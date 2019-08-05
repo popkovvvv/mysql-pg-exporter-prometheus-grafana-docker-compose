@@ -1,3 +1,3 @@
-# percona pmm docker-compose running
+# mysql-pg-exporter-prometheus-grafana-docker-compose running
 
 > just for test
